@@ -35,16 +35,17 @@ public class ReadInput {
             board = new char[rows][cols];
 
             while (scanner.hasNext()) {
-                String token = scanner.next();
+                String token = scanner.nextLine();
+                Boolean first = true;
                 for (char c : token.toCharArray()) {
+                    if (c == ' ') continue;
+                    
                     if (c == 'K') {
-                        System.out.println(i);
-                        System.out.println(j);
                         if (j == 0)
                             exit = 'U';
                         else if (j == rows - 1)
                             exit = 'D';
-                        else if (i == 0)
+                        else if (first)
                             exit = 'L';
                         else if (i == cols)
                             exit = 'R';
@@ -57,6 +58,7 @@ public class ReadInput {
                         board[j][i] = c;
                         i++;
                     }
+                    first = false;
                 }
             }
 

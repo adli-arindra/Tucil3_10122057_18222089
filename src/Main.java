@@ -3,13 +3,39 @@ import java.util.List;
 import element.Board;
 import element.Piece;
 import utils.ReadInput;
+import utils.Listener;
+import view.RootWindow;
 
 public class Main {
-    public static void main(String[] args) {
-        ReadInput reader = new ReadInput();
-        reader.read("test/4.txt");
+    public static Board board;
+    public static List<Board> solutionSteps;
+    public static RootWindow window;
 
-        Board board = new Board(reader.getBoardSize()[0], reader.getBoardSize()[1]);
+    public static void main(String[] args) {
+        Listener listener = new Listener() {
+            @Override
+            public void onSearch(String algorithm, String heuristic) {
+                Main.onSearchSelected(algorithm, heuristic);
+            }
+            @Override
+            public void onFileSelected(String filePath) {
+                Main.readInput(filePath);
+            }
+        };
+        
+        readInput("test/4.txt");
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            window = new RootWindow(board, listener);
+            window.showWindow();
+        });
+    }
+
+    private static void readInput(String path) {
+        ReadInput reader = new ReadInput();
+        reader.read(path);
+
+        board = new Board(reader.getBoardSize()[0], reader.getBoardSize()[1], reader.getExit());
         List<Piece> pieces = reader.getPieces();
 
         for (Piece piece : pieces) {
@@ -17,8 +43,10 @@ public class Main {
         }
 
         board.print();
+        if (window != null) window.setBoard(board);
+    }
 
-        System.out.println(reader.getExit());
-
+    public static void onSearchSelected(String algorithm, String heuristic) {
+        System.out.println("Algorithm: " + algorithm + ", Heuristic: " + heuristic);
     }
 }

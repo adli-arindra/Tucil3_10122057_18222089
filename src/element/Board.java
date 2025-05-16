@@ -6,13 +6,15 @@ import java.util.List;
 public class Board {
     private List<Piece> pieces;
     private long hash;
-    private int a, b;
+    public int a, b;
+    private char exit;
 
-    public Board(int a, int b) {
+    public Board(int a, int b, char exit) {
         this.pieces = new ArrayList<>();
         this.hash = 0;
         this.a = a;
         this.b = b;
+        this.exit = exit;
     }
 
     public void addPiece(Piece piece) {
@@ -25,6 +27,10 @@ public class Board {
     public void resetPieces() {
         pieces.clear();
         this.hash = 0;
+    }
+
+    public char getExit() {
+        return this.exit;
     }
 
     public char[][] getBoard() {
