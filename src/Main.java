@@ -1,9 +1,9 @@
-import java.util.List;
-
 import element.Board;
 import element.Piece;
-import utils.ReadInput;
+import java.util.List;
+import pathfinder.GBFS;
 import utils.Listener;
+import utils.ReadInput;
 import view.RootWindow;
 
 public class Main {
@@ -24,11 +24,21 @@ public class Main {
         };
         
         readInput("test/4.txt");
+        GBFS gbfs = new GBFS(board.getExit());
+        List<Board> res = gbfs.search(board);
+
+        System.out.println("masuk");
+        System.out.println(res.size());
+        for (Board b : res) {
+            b.print();
+        }
+        System.out.println("kelar");
 
         javax.swing.SwingUtilities.invokeLater(() -> {
             window = new RootWindow(board, listener);
             window.showWindow();
         });
+
     }
 
     private static void readInput(String path) {

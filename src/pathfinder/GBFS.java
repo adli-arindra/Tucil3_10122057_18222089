@@ -1,13 +1,13 @@
 package pathfinder;
 
 import element.Board;
-import element.Direction;
 import element.Piece;
 import java.util.*;
+import utils.Direction;
 
 public class GBFS implements Pathfinder {
-    private char exitDirection;
-    private PriorityQueue<State> queue;
+    private final char exitDirection;
+    private final PriorityQueue<State> queue;
 
     public GBFS(char exitDirection) {
         this.exitDirection = exitDirection;
@@ -27,9 +27,10 @@ public class GBFS implements Pathfinder {
     }
 
     @Override
-    public List<Board> search(Board board, HashMap<Long, Boolean> visited) {
+    public List<Board> search(Board board) {
         double startHeuristic = heuristic1(board);
         queue.add(new State(board, null, startHeuristic));
+        HashMap<Long, Boolean> visited = new HashMap<>();
         visited.put(board.getHash(), true);
 
         while (!queue.isEmpty()) {
@@ -53,8 +54,6 @@ public class GBFS implements Pathfinder {
                 visited.put(neighborHash, true);
                 }
             }
-            
-
         }
         
         return new ArrayList<>(); 
@@ -72,16 +71,19 @@ public class GBFS implements Pathfinder {
         int boardHeight = board.getHeight();
         
         switch(exit) {
-            case 'U':
+            case 'U' -> {
                 return piece.x;
-            case 'D':
+            }
+            case 'D' -> {
                 return (boardHeight - 1) - (piece.x + piece.length - 1);
-            case 'L':
+            }
+            case 'L' -> {
                 return piece.y;
-            case 'R':
+            }
+            case 'R' -> {
                 return (boardWidth - 1) - (piece.y + piece.length - 1);
-            default:
-                throw new IllegalArgumentException("Invalid exit direction: " + exit);
+            }
+            default -> throw new IllegalArgumentException("Invalid exit direction: " + exit);
         }
     }
     private List<Board> generateNeighbors(Board board) {

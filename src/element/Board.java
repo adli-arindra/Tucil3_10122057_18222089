@@ -2,11 +2,13 @@ package element;
 
 import java.util.ArrayList;
 import java.util.List;
+import utils.Direction;
+
 public class Board {
-    private List<Piece> pieces;
+    private final List<Piece> pieces;
     private long hash;
     public int a, b;
-    private char exit;
+    private final char exit;
 
     public Board(int a, int b, char exit) {
         this.pieces = new ArrayList<>();
@@ -92,7 +94,6 @@ public class Board {
     }
     public boolean isGoal(){
         Piece primaryPiece = getPrimaryPiece();
-        char exit = getExit();
         switch(exit) {
             case 'U' -> {
                 return primaryPiece.orientation == 'V' && primaryPiece.x == 0;
