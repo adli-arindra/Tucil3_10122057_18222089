@@ -45,7 +45,7 @@ public class RootWindow extends JFrame {
         row1.add(loadFileButton);
 
         algorithmDropdown = new JComboBox<>(new String[] { "GBFS", "UCS", "A*" });
-        heuristicDropdown = new JComboBox<>(new String[] { "one", "two" });
+        heuristicDropdown = new JComboBox<>(new String[] { "Distance", "Tiles" });
         JButton searchButton = new JButton("Search");
 
         row1.add(new JLabel("Algorithm:"));
@@ -88,6 +88,20 @@ public class RootWindow extends JFrame {
                 if (listener != null) {
                     listener.onFileSelected(selectedFilePath);
                 }
+            }
+        });
+
+        algorithmDropdown.addActionListener(e -> {
+            String selected = (String) algorithmDropdown.getSelectedItem();
+            if (selected != null) {
+                data.setSearchMethod(selected);
+            }
+        });
+
+        heuristicDropdown.addActionListener(e -> {
+            String selected = (String) heuristicDropdown.getSelectedItem();
+            if (selected != null) {
+                data.setHeuristicMethod(selected);
             }
         });
 

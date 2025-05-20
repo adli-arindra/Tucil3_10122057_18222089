@@ -10,9 +10,11 @@ import view.RootWindow;
 public class Main {
     public static RootWindow window;
     public static Data data;
+    public static Pathfinder path;
 
     public static void main(String[] args) {
         data = new Data();
+        path = new Pathfinder(data);
         Listener listener = new Listener() {
             @Override
             public void onSearch(String algorithm, String heuristic) {
@@ -52,7 +54,6 @@ public class Main {
     public static void searchSolution(String algorithm, String heuristic) {
         System.out.println("Algorithm: " + algorithm + ", Heuristic: " + heuristic);
 
-        Pathfinder path = new Pathfinder();
         List<Board> solutionSteps = path.search(data.getInitialBoard());
         data.setSolutionSteps(solutionSteps);
     }

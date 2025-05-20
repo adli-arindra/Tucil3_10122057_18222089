@@ -2,22 +2,25 @@ package pathfinder;
 
 import element.Board;
 import java.util.*;
+import model.Data;
 
 public class Pathfinder {
     private final PriorityQueue<State> queue;
+    private final Data data;
 
-    public Pathfinder() {
-        this.queue = new PriorityQueue<>(Comparator.comparingDouble(state -> state.heuristic));
+    public Pathfinder(Data data) {
+        this.queue = new PriorityQueue<>(Comparator.comparingDouble(state -> state.cost));
+        this.data = data;
     }
 
     private static class State {
         public Board board;
-        public double heuristic;
+        public double cost;
         public State parent;
 
-        State(Board board, double heuristic, State parent) {
+        State(Board board, double cost, State parent) {
             this.board = board;
-            this.heuristic = heuristic;
+            this.cost = cost;
             this.parent = parent;
         }
     }
@@ -25,8 +28,8 @@ public class Pathfinder {
 
     public List<Board> search(Board board) {
         queue.clear();
-        double startHeuristic = 0;
-        queue.add(new State(board, startHeuristic, null));
+        double startcost = 0;
+        queue.add(new State(board, startcost, null));
         HashMap<Long, Boolean> visited = new HashMap<>();
         visited.put(board.getHash(), true);
 
@@ -51,8 +54,8 @@ public class Pathfinder {
             for (Board neighbor : neighbors) {
                 long neighborHash = neighbor.getHash();
                 if (!visited.containsKey(neighborHash)) {
-                    double heuristic = current.heuristic + 1;
-                    State nextState = new State(neighbor, heuristic, current);
+                    double cost = getCost(neighbor, current);
+                    State nextState = new State(neighbor, cost, current);
                     queue.add(nextState);
                     visited.put(neighborHash, true);
                 }
@@ -62,24 +65,33 @@ public class Pathfinder {
         return new ArrayList<>();
     }
 
-    // private int calculateDistance(Piece piece, char exit, Board board) {
-    //     int boardWidth = board.getWidth();
-    //     int boardHeight = board.getHeight();
-        
-    //     switch(exit) {
-    //         case 'U' -> {
-    //             return piece.x;
-    //         }
-    //         case 'D' -> {
-    //             return (boardHeight - 1) - (piece.x + piece.length - 1);
-    //         }
-    //         case 'L' -> {
-    //             return piece.y;
-    //         }
-    //         case 'R' -> {
-    //             return (boardWidth - 1) - (piece.y + piece.length - 1);
-    //         }
-    //         default -> throw new IllegalArgumentException("Invalid exit direction: " + exit);
-    //     }
-    // }
+    // UCS, GBFS, A*
+    private double getCost(Board board, State state) {
+        String method = data.getSearchMethod();
+        if (null != method) switch (method) {
+            case "UCS" -> {
+                return state.cost + 1;
+            }
+            case "GBFS" -> {
+                return getHeuristic(board);
+            }
+            case "A*" -> {
+                return getHeuristic(board) + state.cost + 1;
+            }
+            default -> {
+            }
+        }
+
+        return 0.0;
+    }
+
+    // Distance, Tiles
+    private double getHeuristic(Board board) {
+        if (data.getHeuristicMethod().equals("Distance")) {
+            return Heuristic.blockingTiles(board);
+        }
+        else {
+            return Heuristic.distanceToExit(board);
+        }
+    }
 }
