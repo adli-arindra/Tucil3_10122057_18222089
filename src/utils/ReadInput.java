@@ -1,5 +1,6 @@
 package utils;
 
+import element.Piece;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -7,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-
-import element.Piece;
 
 public class ReadInput {
     private int rows;
@@ -95,22 +94,26 @@ public class ReadInput {
                         length++;
                         col++;
                     }
-                } else if (i + 1 < rows && board[i + 1][j] == label) {
+                }
+                else if (i + 1 < rows && board[i + 1][j] == label) {
                     orientation = 'V';
                     int row = i + 1;
                     while (row < rows && board[row][j] == label) {
                         length++;
                         row++;
                     }
-                } else {
+                } 
+                else {
                     orientation = 'H';
                 }
-                result.add(new Piece(label, orientation, i, j, length));
+
+                result.add(new Piece(label, orientation, j, i, length));
                 seen.add(label);
             }
         }
         return result;
     }
+
 
     public List<Piece> getPieces() {
         return pieces;

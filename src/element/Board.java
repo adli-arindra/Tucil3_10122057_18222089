@@ -2,17 +2,14 @@ package element;
 
 import java.util.ArrayList;
 import java.util.List;
-import utils.Direction;
 
 public class Board {
-    private final List<Piece> pieces;
-    private long hash;
+    public List<Piece> pieces;
     public int a, b;
     private final char exit;
 
     public Board(int a, int b, char exit) {
         this.pieces = new ArrayList<>();
-        this.hash = 0;
         this.a = a;
         this.b = b;
         this.exit = exit;
@@ -21,13 +18,11 @@ public class Board {
     public void addPiece(Piece piece) {
         if (piece != null) {
             pieces.add(piece);
-            this.hash += piece.getHash();
         }
     }
 
     public void resetPieces() {
         pieces.clear();
-        this.hash = 0;
     }
 
     public char getExit() {
@@ -35,9 +30,9 @@ public class Board {
     }
 
     public char[][] getBoard() {
-        char[][] mat = new char[a][b];
-        for (int i = 0; i < a; i++) {
-            for (int j = 0; j < b; j++) {
+        char[][] mat = new char[b][a];
+        for (int i = 0; i < b; i++) {
+            for (int j = 0; j < a; j++) {
                 mat[i][j] = '.';
             }
         }
@@ -51,25 +46,26 @@ public class Board {
 
             if (orientation == 'H') {
                 for (int i = 0; i < length; i++) {
-                    mat[x][y + i] = label;
+                    mat[y][x + i] = label;
                 }
             } else if (orientation == 'V') {
                 for (int i = 0; i < length; i++) {
-                    mat[x + i][y] = label;
+                    mat[y + i][x] = label;
                 }
             }
         }
         
         return mat;
     }
+    
     public Piece getPrimaryPiece() {
-    for (Piece piece : this.pieces) {
-        if (piece.label == 'P') {
-            return piece;
+        for (Piece piece : this.pieces) {
+            if (piece.label == 'P') {
+                return piece;
+            }
         }
-    }
 
-    throw new IllegalStateException("Main piece not found!");
+        throw new IllegalStateException("Main piece not found!");
     }
 
     public void print() {
@@ -83,7 +79,11 @@ public class Board {
     }
 
     public long getHash() {
-        return this.hash;
+        long ret = 17;
+        for (Piece piece : this.pieces) {
+            ret = ret * 31 + Integer.toUnsignedLong(piece.getHash());
+        }
+        return ret;
     }
 
     public int getWidth() {
@@ -92,111 +92,65 @@ public class Board {
     public int getHeight() {
         return this.b;
     }
+
     public boolean isGoal(){
         Piece primaryPiece = getPrimaryPiece();
         switch(exit) {
             case 'U' -> {
-                return primaryPiece.orientation == 'V' && primaryPiece.x == 0;
+                return primaryPiece.orientation == 'V' && primaryPiece.y == 0;
             }
             case 'D' -> {
-                return primaryPiece.orientation == 'V' &&  (primaryPiece.x + primaryPiece.length) == getHeight();
+                return primaryPiece.orientation == 'V' &&  (primaryPiece.y + primaryPiece.length) >= getHeight();
             }
             case 'L' -> {
-                return primaryPiece.orientation == 'H' && primaryPiece.y == 0;
+                return primaryPiece.orientation == 'H' && primaryPiece.x == 0;
             }
             case 'R' -> {
-                return primaryPiece.orientation == 'H' && (primaryPiece.y + primaryPiece.length) == getWidth();
+                return primaryPiece.orientation == 'H' && (primaryPiece.x + primaryPiece.length) >= getWidth();
             }
             default -> throw new IllegalArgumentException("Invalid exit direction: " + exit);
-        }
-
-    }
-    public List<Piece> getMovablePieces() {
-    List<Piece> movable = new ArrayList<>();
-    for (Piece piece : pieces) {
-        // Check if piece can move in any direction
-        for (Direction dir : Direction.values()) {
-            if (canMovePiece(piece, dir)) {
-                movable.add(piece);
-                break;
-            }
-        }
-    }
-    return movable;
-    }
-
-    public boolean canMovePiece(Piece piece, Direction dir) {
-    // Check if movement aligns with piece orientation
-        if ((piece.orientation == 'H' && dir.dx != 0) || 
-            (piece.orientation == 'V' && dir.dy != 0)) {
-            return false;
-        }
-
-    // Calculate new positions
-        int newX = piece.x + dir.dx;
-        int newY = piece.y + dir.dy;
-
-    // Check boundaries
-        if (newX < 0 || newY < 0) return false;
-        if (piece.orientation == 'H' && newY + piece.length > this.a) return false;
-        if (piece.orientation == 'V' && newX + piece.length > this.b) return false;
-
-    // Check collision with other pieces
-        return !hasCollision(piece, newX, newY);
-    }
-
-    private boolean hasCollision(Piece piece, int newX, int newY) {
-        for (Piece other : pieces) {
-            if (other == piece) continue;
-            
-            if (piece.orientation == 'H') {
-                // Check horizontal movement
-                for (int i = 0; i < piece.length; i++) {
-                    if (isOccupied(other, newX, newY + i)) return true;
-                }
-            } else {
-                // Check vertical movement
-                for (int i = 0; i < piece.length; i++) {
-                    if (isOccupied(other, newX + i, newY)) return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isOccupied(Piece piece, int x, int y) {
-        if (piece.orientation == 'H') {
-            return piece.x == x && y >= piece.y && y < piece.y + piece.length;
-        } else {
-            return piece.y == y && x >= piece.x && x < piece.x + piece.length;
         }
     }
 
     public Board copy() {
-    // Create new board with same dimensions and exit
         Board copy = new Board(this.a, this.b, this.exit);
     
-    // Deep copy all pieces
         for (Piece piece : this.pieces) {
-            copy.pieces.add(new Piece(
-                piece.label,
-                (char) piece.x,
-                (char) piece.y,
-                piece.orientation,
-                piece.length
-            ));
-        }
-    
-    // Copy the cached hash
-        copy.hash = this.hash;
-    
+            copy.pieces.add(piece.copy());
+        }    
         return copy;
     }
 
-    public void movePiece(Piece piece, Direction dir) {
-        piece.x += dir.dx;
-        piece.y += dir.dy;
-        // No hash invalidation needed if not using hash caching
-    }
+    public List<Board> generateNeighbors() {
+        List<Board> ret = new ArrayList<>();
+        int height = this.b;
+        int width = this.a;
+        char[][] mat = this.getBoard();
 
+        for (int i = 0; i < this.pieces.size(); ++i) {
+            Piece piece = this.pieces.get(i);
+
+            int[] posPlus = piece.positionPlus();
+            int xPlus = posPlus[0];
+            int yPlus = posPlus[1];
+
+            Board boardPlus = this.copy();
+            if (xPlus >= 0 && xPlus < width && yPlus >= 0 && yPlus < height && mat[yPlus][xPlus] == '.') {
+                boardPlus.pieces.get(i).movePlus();
+                ret.add(boardPlus);
+            }
+
+            int[] posMinus = piece.positionMinus();
+            int xMinus = posMinus[0];
+            int yMinus = posMinus[1];
+
+            Board boardMinus = this.copy();
+            if (xMinus >= 0 && xMinus < width && yMinus >= 0 && yMinus < height && mat[yMinus][xMinus] == '.') {
+                boardMinus.pieces.get(i).moveMinus();
+                ret.add(boardMinus);
+            }
+        }
+
+        return ret;
     }
+}

@@ -1,16 +1,13 @@
 package view;
 
-import javax.swing.*;
-
 import element.Board;
-
 import java.awt.*;
-
 import java.util.*;
+import javax.swing.*;
 
 public class BoardPanel extends JPanel {
     private Board board;
-    private Map<Character, Color> colorMap = new HashMap<>();
+    private final Map<Character, Color> colorMap = new HashMap<>();
 
     public BoardPanel(Board board) {
         this.board = board;
@@ -56,13 +53,10 @@ public class BoardPanel extends JPanel {
                 int x = j * cellWidth;
                 int y = i * cellHeight;
 
-                if (cellChar == 'P') {
-                    g.setColor(Color.RED);
-                }
-                else if (cellChar == '.') {
-                    g.setColor(Color.darkGray);
-                } else {
-                    g.setColor(colorMap.getOrDefault(cellChar, Color.LIGHT_GRAY));
+                switch (cellChar) {
+                    case 'P' -> g.setColor(Color.RED);
+                    case '.' -> g.setColor(Color.darkGray);
+                    default -> g.setColor(colorMap.getOrDefault(cellChar, Color.LIGHT_GRAY));
                 }
 
                 g.fillRect(x, y, cellWidth, cellHeight);
@@ -79,23 +73,19 @@ public class BoardPanel extends JPanel {
             int borderThickness = 10;
 
             switch (exit) {
-                case 'L':
-                    g.fillRect(0, 0, borderThickness, height);
-                    break;
-                case 'R':
-                    g.fillRect(width - borderThickness, 0, borderThickness, height);
-                    break;
-                case 'U':
-                    g.fillRect(0, 0, width, borderThickness);
-                    break;
-                case 'D':
-                    g.fillRect(0, height - borderThickness, width, borderThickness);
-                    break;
+                case 'L' -> g.fillRect(0, 0, borderThickness, height);
+                case 'R' -> g.fillRect(width - borderThickness, 0, borderThickness, height);
+                case 'U' -> g.fillRect(0, 0, width, borderThickness);
+                case 'D' -> g.fillRect(0, height - borderThickness, width, borderThickness);
             }
     }
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(500, 500);
+        if (board == null) return new Dimension(100, 100);
+        int cellSize = 50;
+        int width = board.b * cellSize;
+        int height = board.a * cellSize;
+        return new Dimension(width, height);
     }
 }

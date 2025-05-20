@@ -1,47 +1,83 @@
 package view;
 
-import javax.swing.*;
-
 import element.Board;
-import utils.Listener;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.List;
+import javax.swing.*;
+import model.Data;
+import utils.Listener;
 
 public class RootWindow extends JFrame {
     private JComboBox<String> algorithmDropdown;
     private JComboBox<String> heuristicDropdown;
-    private BoardPanel boardPanel;
+    private final BoardPanel boardPanel;
 
-    public RootWindow(Board board, Listener listener) {
+    private final Data data;  // hold reference to shared data model
+    private int currentStep = 0;
+    private Timer playbackTimer;
+
+    // New controls for index navigation
+    private JButton prevButton;
+    private JButton nextButton;
+    private JLabel indexLabel;
+    private JButton resetButton;
+
+    public RootWindow(Data data, Listener listener) {
+        this.data = data;
+
         setTitle("Game Board");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(600, 700);
         setLocationRelativeTo(null);
 
-        boardPanel = new BoardPanel(board);
+        boardPanel = new BoardPanel(data.getInitialBoard());
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.add(boardPanel);
-        
-        JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new FlowLayout());
+        add(centerPanel, BorderLayout.CENTER);
 
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton loadFileButton = new JButton("Load New File");
-        controlPanel.add(loadFileButton);
-        
+        row1.add(loadFileButton);
+
         algorithmDropdown = new JComboBox<>(new String[] { "GBFS", "UCS", "A*" });
         heuristicDropdown = new JComboBox<>(new String[] { "one", "two" });
         JButton searchButton = new JButton("Search");
-        
-        controlPanel.add(new JLabel("Algorithm:"));
-        controlPanel.add(algorithmDropdown);
-        
-        controlPanel.add(new JLabel("Heuristic:"));
-        controlPanel.add(heuristicDropdown);
-        
-        controlPanel.add(searchButton);
+
+        row1.add(new JLabel("Algorithm:"));
+        row1.add(algorithmDropdown);
+
+        row1.add(new JLabel("Heuristic:"));
+        row1.add(heuristicDropdown);
+
+        row1.add(searchButton);
+
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        JButton playButton = new JButton("Play");
+        JButton pauseButton = new JButton("Pause");
+        JButton stepButton = new JButton("Step");
+
+        row2.add(playButton);
+        row2.add(pauseButton);
+        row2.add(stepButton);
+
+        prevButton = new JButton("-");
+        nextButton = new JButton("+");
+        indexLabel = new JLabel("0");
+        resetButton = new JButton("Reset");
+
+        row2.add(prevButton);
+        row2.add(indexLabel);
+        row2.add(nextButton);
+        row2.add(resetButton);
+
+        controlPanel.add(row1);
+        controlPanel.add(row2);
 
         loadFileButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser(new java.io.File("test"));
@@ -55,20 +91,74 @@ public class RootWindow extends JFrame {
             }
         });
 
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String algorithm = (String) algorithmDropdown.getSelectedItem();
-                String heuristic = (String) heuristicDropdown.getSelectedItem();
-                if (listener != null) {
-                    listener.onSearch(algorithm, heuristic);
-                }
+        searchButton.addActionListener((ActionEvent e) -> {
+            String algorithm = (String) algorithmDropdown.getSelectedItem();
+            String heuristic = (String) heuristicDropdown.getSelectedItem();
+            if (listener != null) {
+                listener.onSearch(algorithm, heuristic);
             }
+        });
+
+        playButton.addActionListener(e -> {
+            List<Board> steps = data.getSolutionSteps();
+            if (steps == null || steps.isEmpty()) return;
+            if (playbackTimer != null && playbackTimer.isRunning()) return;
+
+            playbackTimer = new Timer(500, evt -> {
+                if (currentStep < steps.size() - 1) {
+                    currentStep++;
+                    updateBoardAndLabel();
+                } else {
+                    playbackTimer.stop();
+                }
+            });
+            playbackTimer.start();
+        });
+
+        pauseButton.addActionListener(e -> {
+            if (playbackTimer != null) {
+                playbackTimer.stop();
+            }
+        });
+
+        stepButton.addActionListener(e -> {
+            List<Board> steps = data.getSolutionSteps();
+            if (steps == null || currentStep >= steps.size() - 1) return;
+            currentStep++;
+            updateBoardAndLabel();
+        });
+
+        prevButton.addActionListener(e -> {
+            if (currentStep > 0) {
+                currentStep--;
+                updateBoardAndLabel();
+            }
+        });
+
+        nextButton.addActionListener(e -> {
+            List<Board> steps = data.getSolutionSteps();
+            if (steps != null && currentStep < steps.size() - 1) {
+                currentStep++;
+                updateBoardAndLabel();
+            }
+        });
+
+        resetButton.addActionListener(e -> {
+            currentStep = 0;
+            updateBoardAndLabel();
         });
 
         setLayout(new BorderLayout());
         add(centerPanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
+    }
+
+    private void updateBoardAndLabel() {
+        List<Board> steps = data.getSolutionSteps();
+        if (steps != null && !steps.isEmpty() && currentStep >= 0 && currentStep < steps.size()) {
+            setBoard(steps.get(currentStep));
+            indexLabel.setText(String.valueOf(currentStep));
+        }
     }
 
     public void showWindow() {

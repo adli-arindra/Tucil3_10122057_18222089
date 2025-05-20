@@ -1,21 +1,22 @@
 import element.Board;
 import element.Piece;
 import java.util.List;
-import pathfinder.GBFS;
+import model.Data;
+import pathfinder.Pathfinder;
 import utils.Listener;
 import utils.ReadInput;
 import view.RootWindow;
 
 public class Main {
-    public static Board board;
-    public static List<Board> solutionSteps;
     public static RootWindow window;
+    public static Data data;
 
     public static void main(String[] args) {
+        data = new Data();
         Listener listener = new Listener() {
             @Override
             public void onSearch(String algorithm, String heuristic) {
-                Main.onSearchSelected(algorithm, heuristic);
+                Main.searchSolution(algorithm, heuristic);
             }
             @Override
             public void onFileSelected(String filePath) {
@@ -23,19 +24,12 @@ public class Main {
             }
         };
         
-        readInput("test/4.txt");
-        GBFS gbfs = new GBFS(board.getExit());
-        List<Board> res = gbfs.search(board);
-
-        System.out.println("masuk");
-        System.out.println(res.size());
-        for (Board b : res) {
-            b.print();
-        }
-        System.out.println("kelar");
+        readInput("test/1.txt");
+        searchSolution("", "");
+        
 
         javax.swing.SwingUtilities.invokeLater(() -> {
-            window = new RootWindow(board, listener);
+            window = new RootWindow(data, listener);
             window.showWindow();
         });
 
@@ -45,18 +39,21 @@ public class Main {
         ReadInput reader = new ReadInput();
         reader.read(path);
 
-        board = new Board(reader.getBoardSize()[0], reader.getBoardSize()[1], reader.getExit());
+        Board board = new Board(reader.getBoardSize()[0], reader.getBoardSize()[1], reader.getExit());
         List<Piece> pieces = reader.getPieces();
 
         for (Piece piece : pieces) {
             board.addPiece(piece);
         }
 
-        board.print();
-        if (window != null) window.setBoard(board);
+        data.setInitialBoard(board);
     }
 
-    public static void onSearchSelected(String algorithm, String heuristic) {
+    public static void searchSolution(String algorithm, String heuristic) {
         System.out.println("Algorithm: " + algorithm + ", Heuristic: " + heuristic);
+
+        Pathfinder path = new Pathfinder();
+        List<Board> solutionSteps = path.search(data.getInitialBoard());
+        data.setSolutionSteps(solutionSteps);
     }
 }
