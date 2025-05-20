@@ -8,20 +8,23 @@ import javax.swing.*;
 import model.Data;
 import utils.Listener;
 
-public class RootWindow extends JFrame {
+public final class RootWindow extends JFrame {
     private JComboBox<String> algorithmDropdown;
     private JComboBox<String> heuristicDropdown;
     private final BoardPanel boardPanel;
 
-    private final Data data;  // hold reference to shared data model
+    private final Data data;
     private int currentStep = 0;
     private Timer playbackTimer;
 
-    // New controls for index navigation
     private JButton prevButton;
     private JButton nextButton;
     private JLabel indexLabel;
     private JButton resetButton;
+
+    private JLabel nodesLabel;
+    private JLabel timeLabel;
+
 
     public RootWindow(Data data, Listener listener) {
         this.data = data;
@@ -39,6 +42,14 @@ public class RootWindow extends JFrame {
 
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        nodesLabel = new JLabel("Visited Nodes: 0");
+        timeLabel = new JLabel("Time: 0 ms");
+        infoPanel.add(nodesLabel);
+        infoPanel.add(timeLabel);
+
+        controlPanel.add(infoPanel);
 
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton loadFileButton = new JButton("Load New File");
@@ -165,13 +176,17 @@ public class RootWindow extends JFrame {
         setLayout(new BorderLayout());
         add(centerPanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
+
+        updateBoardAndLabel();
     }
 
-    private void updateBoardAndLabel() {
+    public void updateBoardAndLabel() {
         List<Board> steps = data.getSolutionSteps();
         if (steps != null && !steps.isEmpty() && currentStep >= 0 && currentStep < steps.size()) {
             setBoard(steps.get(currentStep));
             indexLabel.setText(String.valueOf(currentStep));
+            nodesLabel.setText("Visited Nodes: " + data.benchmark.getVisitedNodes());
+            timeLabel.setText("Time: " + data.benchmark.getElapsedTimeMillis() + " ms");
         }
     }
 

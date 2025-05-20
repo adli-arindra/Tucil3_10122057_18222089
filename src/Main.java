@@ -28,7 +28,6 @@ public class Main {
         
         readInput("test/1.txt");
         searchSolution("", "");
-        
 
         javax.swing.SwingUtilities.invokeLater(() -> {
             window = new RootWindow(data, listener);
@@ -52,9 +51,10 @@ public class Main {
     }
 
     public static void searchSolution(String algorithm, String heuristic) {
-        System.out.println("Algorithm: " + algorithm + ", Heuristic: " + heuristic);
-
+        data.benchmark.startTimer();
         List<Board> solutionSteps = path.search(data.getInitialBoard());
         data.setSolutionSteps(solutionSteps);
+        data.benchmark.stopTimer();
+        if (window != null) window.updateBoardAndLabel();
     }
 }

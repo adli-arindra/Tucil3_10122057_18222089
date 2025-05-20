@@ -10,12 +10,17 @@ public class Data {
     private int currentStepIndex = 0;
     private String heuristicMethod = "Distance"; // Distance, Tiles
     private String searchMethod = "UCS"; // UCS, GBFS, A*
+    public Benchmark benchmark;
 
-    public Board getInitialBoard() {
+    public Data() {
+        this.benchmark = new Benchmark();
+    }
+
+    public synchronized Board getInitialBoard() {
         return initialBoard;
     }
 
-    public void setInitialBoard(Board initialBoard) {
+    public synchronized void setInitialBoard(Board initialBoard) {
         this.initialBoard = initialBoard;
     }
 
@@ -36,19 +41,19 @@ public class Data {
         this.currentStepIndex = index;
     }
 
-    public String getHeuristicMethod() {
+    public synchronized String getHeuristicMethod() {
         return this.heuristicMethod;
     }
 
-    public void setHeuristicMethod(String heuristicMethod) {
+    public synchronized void setHeuristicMethod(String heuristicMethod) {
         this.heuristicMethod = heuristicMethod;
     }
 
-    public String getSearchMethod() {
+    public synchronized String getSearchMethod() {
         return this.searchMethod;
     }
 
-    public void setSearchMethod(String searchMethod) {
+    public synchronized void setSearchMethod(String searchMethod) {
         this.searchMethod = searchMethod;
     }
 }

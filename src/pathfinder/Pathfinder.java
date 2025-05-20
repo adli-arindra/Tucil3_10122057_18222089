@@ -32,13 +32,14 @@ public class Pathfinder {
         queue.add(new State(board, startcost, null));
         HashMap<Long, Boolean> visited = new HashMap<>();
         visited.put(board.getHash(), true);
+        int visitedNodes = 0;
 
         while (!queue.isEmpty()) {
             State current = queue.poll();
             Board currentBoard = current.board;
+            visitedNodes ++;
 
             if (currentBoard.isGoal()) {
-                System.out.println("is goal");
                 List<Board> path = new ArrayList<>();
                 State node = current;
                 while (node != null) {
@@ -46,6 +47,7 @@ public class Pathfinder {
                     node = node.parent; 
                 }
                 Collections.reverse(path);
+                data.benchmark.setVisitedNodes(visitedNodes);
                 return path;
             }
 
