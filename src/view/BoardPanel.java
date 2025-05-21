@@ -4,6 +4,7 @@ import element.Board;
 import java.awt.*;
 import java.util.*;
 import javax.swing.*;
+import pathfinder.Heuristic;
 
 public class BoardPanel extends JPanel {
     private Board board;
@@ -32,6 +33,7 @@ public class BoardPanel extends JPanel {
         this.board = newBoard;
         generateColors();
         repaint();
+        System.out.println(Heuristic.distanceToExit(newBoard));
     }
 
     @Override

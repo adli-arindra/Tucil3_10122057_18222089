@@ -9,16 +9,16 @@ public class Pathfinder {
     private final Data data;
 
     public Pathfinder(Data data) {
-        this.queue = new PriorityQueue<>(Comparator.comparingDouble(state -> state.cost));
+        this.queue = new PriorityQueue<>(Comparator.comparingInt(state -> state.cost));
         this.data = data;
     }
 
     private static class State {
         public Board board;
-        public double cost;
+        public int cost;
         public State parent;
 
-        State(Board board, double cost, State parent) {
+        State(Board board, int cost, State parent) {
             this.board = board;
             this.cost = cost;
             this.parent = parent;
@@ -28,47 +28,45 @@ public class Pathfinder {
 
     public List<Board> search(Board board) {
         queue.clear();
-        double startcost = 0;
-        queue.add(new State(board, startcost, null));
-        HashMap<Long, Boolean> visited = new HashMap<>();
-        visited.put(board.getHash(), true);
+        queue.add(new State(board, 0, null));
+
+        Map<Long, Integer> visited = new HashMap<>();
         int visitedNodes = 0;
 
         while (!queue.isEmpty()) {
             State current = queue.poll();
             Board currentBoard = current.board;
-            visitedNodes ++;
+            long hash = currentBoard.getHash();
+
+            // Skip if we’ve already seen a cheaper path
+            if (visited.containsKey(hash) && visited.get(hash) <= current.cost) continue;
+
+            visited.put(hash, current.cost);
+            visitedNodes++;
+
+            System.out.println("Cost: " + current.cost);
 
             if (currentBoard.isGoal()) {
                 List<Board> path = new ArrayList<>();
-                State node = current;
-                while (node != null) {
+                for (State node = current; node != null; node = node.parent)
                     path.add(node.board);
-                    node = node.parent; 
-                }
                 Collections.reverse(path);
                 data.benchmark.setVisitedNodes(visitedNodes);
                 return path;
             }
 
-            List<Board> neighbors = currentBoard.generateNeighbors();
-
-            for (Board neighbor : neighbors) {
-                long neighborHash = neighbor.getHash();
-                if (!visited.containsKey(neighborHash)) {
-                    double cost = getCost(neighbor, current);
-                    State nextState = new State(neighbor, cost, current);
-                    queue.add(nextState);
-                    visited.put(neighborHash, true);
-                }
+            for (Board neighbor : currentBoard.generateNeighbors()) {
+                int cost = getCost(neighbor, current);
+                queue.add(new State(neighbor, cost, current));
             }
         }
 
         return new ArrayList<>();
     }
 
+
     // UCS, GBFS, A*
-    private double getCost(Board board, State state) {
+    private int getCost(Board board, State state) {
         String method = data.getSearchMethod();
         if (null != method) switch (method) {
             case "UCS" -> {
@@ -84,11 +82,11 @@ public class Pathfinder {
             }
         }
 
-        return 0.0;
+        return 0;
     }
 
     // Distance, Tiles
-    private double getHeuristic(Board board) {
+    private int getHeuristic(Board board) {
         if (data.getHeuristicMethod().equals("Distance")) {
             return Heuristic.blockingTiles(board);
         }

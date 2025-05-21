@@ -6,6 +6,7 @@ public class Heuristic {
     public static int distanceToExit(Board board) {
         Piece primary = board.getPrimaryPiece();
         int dist = 0;
+        System.out.println(board.getExit());
 
         switch (board.getExit()) {
             case 'L' -> dist = primary.x;
@@ -13,6 +14,7 @@ public class Heuristic {
             case 'U' -> dist = primary.y;
             case 'D' -> dist = board.getHeight() - (primary.y + primary.length);
         }
+
         return Math.max(dist, 0);
     }
 

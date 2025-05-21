@@ -55,7 +55,7 @@ public final class RootWindow extends JFrame {
         JButton loadFileButton = new JButton("Load New File");
         row1.add(loadFileButton);
 
-        algorithmDropdown = new JComboBox<>(new String[] { "GBFS", "UCS", "A*" });
+        algorithmDropdown = new JComboBox<>(new String[] { "UCS", "GBFS", "A*" });
         heuristicDropdown = new JComboBox<>(new String[] { "Distance", "Tiles" });
         JButton searchButton = new JButton("Search");
 
