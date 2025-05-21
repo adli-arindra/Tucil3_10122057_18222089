@@ -1,5 +1,8 @@
 package element;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,5 +155,20 @@ public class Board {
         }
 
         return ret;
+    }
+
+    public void saveToTxt(String filename) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            char[][] mat = getBoard();
+            for (char[] row : mat) {
+                for (char c : row) {
+                    writer.write(c);
+                    writer.write(' ');
+                }
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            // e.printStackTrace();
+        }
     }
 }

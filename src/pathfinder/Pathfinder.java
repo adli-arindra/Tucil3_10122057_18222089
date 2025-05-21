@@ -47,6 +47,7 @@ public class Pathfinder {
             System.out.println("Cost: " + current.cost);
 
             if (currentBoard.isGoal()) {
+                currentBoard.saveToTxt("solution.txt");
                 List<Board> path = new ArrayList<>();
                 for (State node = current; node != null; node = node.parent)
                     path.add(node.board);
